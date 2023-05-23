@@ -186,7 +186,6 @@ fn main() {
             println!("{grid}");
 
             let input = get_from_input();
-            let pos: (i32, i32);
             if let Some((x, y)) = input.split_once(',') {
                 let x = grid.index_from_str(x);
                 let y = grid.index_from_str(y);
