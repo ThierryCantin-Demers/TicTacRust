@@ -57,20 +57,17 @@ impl Grid {
     }
 
     fn index_from_str(&self, index: &str) -> Option<i32> {
-        let index:i32 = if !index.is_empty() && is_string_numeric(index)
-         {
+        let index: i32 = if !index.is_empty() && is_string_numeric(index) {
             index
                 .parse::<i32>()
                 .expect("The index value is not a number.")
-        } 
-        else 
-        {
+        } else {
             println!("The index value is invalid.");
             -1
         };
 
         match index {
-            0|1|2 => Some(index),
+            0 | 1 | 2 => Some(index),
             _ => {
                 println!("The index value is invalid.");
                 None
@@ -79,35 +76,52 @@ impl Grid {
     }
 
     // Determines if there is a winner in the 3x3 grid.
-    fn get_winner(&self) -> Option<CellType>
-    {
+    fn get_winner(&self) -> Option<CellType> {
         // Check rows
-        for row in 0..2
-        {
-            if self.cells[row][0].get_character() == self.cells[row][1].get_character() && self.cells[row][1].get_character() == self.cells[row][2].get_character() && self.cells[row][0].get_character() != ' '
+        for row in 0..=2 {
+            if self.cells[row][0].get_character() == self.cells[row][1].get_character()
+                && self.cells[row][1].get_character() == self.cells[row][2].get_character()
+                && self.cells[row][0].get_character() != ' '
             {
                 return Some(self.cells[row][0]);
             }
         }
 
         // Check columns
-        for column in 0..2
-        {
-            if self.cells[0][column].get_character() == self.cells[1][column].get_character() && self.cells[1][column].get_character() == self.cells[2][column].get_character() && self.cells[0][column].get_character() != ' '
+        for column in 0..=2 {
+            if self.cells[0][column].get_character() == self.cells[1][column].get_character()
+                && self.cells[1][column].get_character() == self.cells[2][column].get_character()
+                && self.cells[0][column].get_character() != ' '
             {
                 return Some(self.cells[0][column]);
             }
         }
 
         // Check diagonals
-        
-        if self.cells[0][0].get_character() == self.cells[1][1].get_character() && self.cells[1][1].get_character() == self.cells[2][2].get_character() && self.cells[0][0].get_character() != ' '
+
+        if (self.cells[0][0].get_character() == self.cells[1][1].get_character()
+            && self.cells[1][1].get_character() == self.cells[2][2].get_character()
+            && self.cells[0][0].get_character() != ' ')
+            || (self.cells[0][2].get_character() == self.cells[1][1].get_character()
+                && self.cells[1][1].get_character() == self.cells[2][0].get_character()
+                && self.cells[0][2].get_character() != ' ')
         {
             return Some(self.cells[0][0]);
         }
 
         return None;
+    }
 
+    fn is_tie(&self) -> bool {
+        for row in 0..=2 {
+            for column in 0..=2 {
+                if self.cells[row][column].get_character() == ' ' {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }
 
@@ -190,39 +204,50 @@ fn main() {
                     continue;
                 }
             } else {
-                println!("Your answer is not written in the right format. Dumbass!");
+                println!("Your answer is not written in the right format.");
             }
         };
 
-        grid.insert(position.0 as usize, position.1  as usize, player_cell_type);
+        grid.insert(position.0 as usize, position.1 as usize, player_cell_type);
 
         let winner = grid.get_winner();
 
-        if !winner.is_none()
-        {
-            println!("The game is over!!!\n");
+        println!("{grid}");
+
+        if !winner.is_none() {
+            println!("The game is over!!!");
             println!("You won!!!! Damn bruh");
+            break;
+        } else if grid.is_tie() {
+            println!("The game is over!!!");
+            println!("It's a tie, you're both cringe");
             break;
         }
 
         // Bot's turn
-        let position: (i32, i32) = loop{
-            let pos:(i32, i32) = ((rand::random::<u32>() % 3) as i32, (rand::random::<u32>() % 3) as i32);
-            if grid.is_cell_empty(pos.0  as usize, pos.1 as usize)
-            {
+        loop {
+            let pos: (i32, i32) = (
+                (rand::random::<u32>() % 3) as i32,
+                (rand::random::<u32>() % 3) as i32,
+            );
+            if grid.is_cell_empty(pos.0 as usize, pos.1 as usize) {
                 grid.insert(pos.0 as usize, pos.1 as usize, bot_cell_type);
-                break pos
+                break;
             }
-        };
+        }
 
         let winner = grid.get_winner();
 
-        if !winner.is_none()
-        {
-            println!("The game is over!!!\n");
+        println!("{grid}");
+
+        if !winner.is_none() {
+            println!("The game is over!!!");
             println!("bruh bruh bruh, you lost to a bot, you're cringe");
             break;
+        } else if grid.is_tie() {
+            println!("The game is over!!!");
+            println!("It's a tie, you're both cringe");
+            break;
         }
-
     }
 }
